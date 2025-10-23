@@ -284,7 +284,10 @@ export default function Home() {
         icon={ScaleIcon({ size: 24, color: "#fff" })}
         backgroundColor="#2996FF"
         borderRadius={50}
-        color={"#fff"}
+        color="#fff"
+        pressStyle={{
+          backgroundColor: "#1E7FE5",
+        }}
       >
         Log Body Weight
       </Button>
