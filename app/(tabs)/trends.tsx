@@ -1,8 +1,18 @@
+import { useAuth } from "@/contexts/AuthContext/useAuth";
+import { useGetWeightsQuery } from "@/features/bodyweight/bodyweightApi";
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { XStack , Text, YStack} from "tamagui";
+import { XStack, Text, YStack } from "tamagui";
 
 export default function GoalsHeader() {
+  const { user } = useAuth();
+  const {
+    data: weights,
+    isLoading,
+    refetch,
+    error,
+  } = useGetWeightsQuery(user?.email);
+  console.log("weights", weights, error);
   return (
     <View style={styles.container}>
       <Text style={styles.leftText}>

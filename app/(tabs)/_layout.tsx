@@ -1,9 +1,11 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Image, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { triggerHaptic } from "@/utils/haptics";
 
 export default function TabsLayout() {
+  const router = useRouter();
+
   const HomeIcon = ({ color = "black", size = 24 }) => (
     <Svg
       width={size}
@@ -124,7 +126,6 @@ export default function TabsLayout() {
           tabBarShowLabel: false,
           headerLeft: () => (
             <Pressable
-              onPress={() => alert("Notifications")}
               style={{
                 marginLeft: 20,
                 width: 50,
@@ -176,22 +177,12 @@ export default function TabsLayout() {
           title: "Trends",
           tabBarShowLabel: false,
         }}
-        listeners={{
-          tabPress: async () => {
-            await triggerHaptic("medium");
-          },
-        }}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
           tabBarShowLabel: false,
-        }}
-        listeners={{
-          tabPress: async () => {
-            await triggerHaptic("medium");
-          },
         }}
       />
     </Tabs>

@@ -26,7 +26,7 @@ export default function LogBodyWeight({ open, onOpenChange }) {
   return (
     <Sheet
       open={open}
-      onOpenChange={(isOpen) => {
+      onOpenChange={(isOpen: boolean) => {
         if (!isOpen) Keyboard.dismiss();
         onOpenChange(isOpen);
       }}
@@ -42,14 +42,9 @@ export default function LogBodyWeight({ open, onOpenChange }) {
         borderTopRightRadius={20}
         position="relative"
       >
-        {/* Header */}
-        <XStack
-          justifyContent="space-between"
-          alignItems="center"
-          marginBottom="$2"
-        >
+        <XStack justifyContent="space-between" alignItems="center">
           <Text fontSize={16} fontWeight="bold" color={"#1E272E"}>
-            Add Body Weight
+            Log Body Weight
           </Text>
           <Pressable
             onPress={async () => {
@@ -79,14 +74,11 @@ export default function LogBodyWeight({ open, onOpenChange }) {
             </Svg>
           </Pressable>
         </XStack>
-
-        {/* Body */}
         <YStack space="$3">
           <Text fontSize={14} color="#979DA3">
             Here you can input your new weight.
           </Text>
-          {/* Date Picker */}
-          <YStack space="$1">
+          <YStack space="$2">
             <Text fontSize={14} color="#1E272E" fontWeight="600">
               Date
             </Text>
@@ -117,10 +109,9 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               />
             )}
           </YStack>
-          {/* Weight Input */}
-          <YStack space="$1">
+          <YStack space="$2">
             <Text fontSize={14} color="#1E272E" fontWeight="600">
-              Weight (kg)
+              Weight (in Kilogram)
             </Text>
             <Input
               value={weight}
@@ -134,8 +125,6 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               padding="$2"
             />
           </YStack>
-
-          {/* Buttons */}
           <XStack justifyContent="space-between" marginTop="$4">
             <Button
               onPress={handleCancel}

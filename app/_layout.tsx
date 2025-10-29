@@ -1,22 +1,71 @@
 import { Stack } from "expo-router";
-import { TamaguiProvider, createTamagui } from "@tamagui/core";
-import { defaultConfig } from "@tamagui/config/v4";
-import { StatusBar } from "react-native";
+import { TamaguiProvider } from "@tamagui/core";
+import { ActivityIndicator, StatusBar, View } from "react-native";
+import {
+  useFonts,
+  Outfit_400Regular,
+  Outfit_600SemiBold,
+} from "@expo-google-fonts/outfit";
+import { Righteous_400Regular } from "@expo-google-fonts/righteous";
+import { config } from "../tamagui.config";
+import { AuthProvider } from "@/contexts/AuthContext/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext/useAuth";
+import { Provider } from "react-redux";
+import { store } from "@/utils/store";
 
 export default function RootLayout() {
-  const config = createTamagui(defaultConfig);
+  function AppLayout() {
+    const { user, loading } = useAuth();
+    const [fontsLoaded] = useFonts({
+      Outfit_400Regular,
+      Outfit_600SemiBold,
+      Righteous_400Regular,
+    });
 
-  return (
-    <TamaguiProvider config={config}>
-      <StatusBar barStyle="dark-content" />
+    if (!fontsLoaded) {
+      return (
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    }
+
+    console.log("user", user);
+
+    if (loading)
+      return (
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    return (
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: "fade_from_bottom",
         }}
       >
-        <Stack.Screen name="(tabs)" />
+        <Stack.Protected guard={!!user}>
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!user}>
+          <Stack.Screen name="auth" />
+        </Stack.Protected>
       </Stack>
-    </TamaguiProvider>
+    );
+  }
+
+  return (
+    <AuthProvider>
+      <Provider store={store}>
+      <TamaguiProvider config={config} defaultTheme="light">
+        <StatusBar barStyle="dark-content" />
+        <AppLayout />
+      </TamaguiProvider>
+      </Provider>
+    </AuthProvider>
   );
 }

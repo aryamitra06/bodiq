@@ -1,4 +1,4 @@
-import { StyleSheet, View, Pressable } from "react-native";
+import { StyleSheet, View, Pressable, Dimensions } from "react-native";
 import { Button, Card, ScrollView, Text, YStack, XStack } from "tamagui";
 import Svg, { Path } from "react-native-svg";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { triggerHaptic } from "@/utils/haptics";
 
 export default function Home() {
   const [showSheet, setShowSheet] = useState(false);
+
   const openSheet = async () => {
     await triggerHaptic("medium");
     setShowSheet(true);
@@ -53,6 +54,25 @@ export default function Home() {
       <Path d="M13 21l1 -9l7 -6" />
       <Path d="M3 11h6l5 1" />
       <Path d="M11.5 8.5l4.5 -3.5" />
+    </Svg>
+  );
+
+  const TargetArrowIcon = ({ color = "black", size = 24 }) => (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+      <Path d="M12 7a5 5 0 1 0 5 5" />
+      <Path d="M13 3.055a9 9 0 1 0 7.941 7.945" />
+      <Path d="M15 6v3h3l3-3h-3v-3" />
+      <Path d="M15 9l-3 3" />
     </Svg>
   );
 
@@ -134,38 +154,57 @@ export default function Home() {
       <ScrollView contentContainerStyle={{ padding: 15 }}>
         <Card padding="$2" borderRadius="$6" backgroundColor="#fff">
           <YStack space="$4">
-            {/* Streak Card */}
             <Card padding="$4" borderRadius="$4" backgroundColor="#EAEEF4">
               <XStack alignItems="center" space="$3">
                 <FireIconBadge size={40} />
                 <YStack flex={1}>
-                  <Text fontSize={18} fontWeight="bold" color={"#1E272E"}>
+                  <Text
+                    fontSize={18}
+                    color={"#1E272E"}
+                    fontWeight="600"
+                    fontFamily="$body"
+                  >
                     14 days streak
                   </Text>
-                  <Text fontSize={12} color="#666">
+                  <Text
+                    fontSize={12}
+                    color="#666"
+                    fontWeight="400"
+                    fontFamily="$body"
+                  >
                     Keep it up, you are the best!
                   </Text>
                 </YStack>
               </XStack>
             </Card>
-            {/* Quote Section */}
             <XStack alignItems="center" space="$3" padding="$3">
               <GymnasticsIcon size={24} color="#666" />
-              <Text flex={1} fontSize={14} color="#666">
+              <Text
+                flex={1}
+                fontSize={14}
+                color="#666"
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Train your mind before your muscles, discipline beats
                 motivation.
               </Text>
             </XStack>
           </YStack>
         </Card>
-        {/* Health Indicators Section */}
         <XStack
           justifyContent="space-between"
           alignItems="center"
           marginTop="$5"
           marginBottom="$3"
         >
-          <Text fontSize={16} fontWeight="bold" flex={1} color={"#1E272E"}>
+          <Text
+            fontSize={16}
+            flex={1}
+            color={"#1E272E"}
+            fontWeight="600"
+            fontFamily="$body"
+          >
             Your latest health indicators
           </Text>
           <Pressable
@@ -176,7 +215,12 @@ export default function Home() {
               padding: 5,
             })}
           >
-            <Text fontSize={13} color="#666">
+            <Text
+              fontSize={13}
+              color="#666"
+              fontWeight="400"
+              fontFamily="$body"
+            >
               Show more
             </Text>
           </Pressable>
@@ -185,14 +229,25 @@ export default function Home() {
           <XStack alignItems="center" space="$3" marginBottom="$3">
             <ActivityIconBadge size={40} />
             <YStack flex={1}>
-              <Text fontSize={16} color="#E2E5E7" fontWeight="$6">
+              <Text
+                fontSize={16}
+                color="#E2E5E7"
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Distance Increase on 37%
               </Text>
-              <Text fontSize={12} color="#979DA3">
+              <Text
+                fontSize={12}
+                color="#979DA3"
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Last activity for 22 Oct.
               </Text>
             </YStack>
           </XStack>
+
           <XStack
             marginTop="$2"
             alignItems="center"
@@ -201,53 +256,103 @@ export default function Home() {
           >
             <YStack flex={1}>
               <XStack alignItems="flex-end" space={3}>
-                <Text fontSize={24} fontWeight="bold" color="#E2E5E7">
+                <Text
+                  fontSize={24}
+                  color="#E2E5E7"
+                  fontWeight="600"
+                  fontFamily="$body"
+                >
                   5.28
                 </Text>
-                <Text fontSize={12} color="#979DA3" marginBottom={3}>
+                <Text fontSize={12} color="#979DA3" marginBottom={6}>
                   km
                 </Text>
               </XStack>
-              <Text fontSize={12} color="#979DA3" marginTop={4}>
+              <Text
+                fontSize={12}
+                color="#979DA3"
+                marginTop={4}
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Distance
               </Text>
             </YStack>
             <YStack flex={1}>
               <XStack alignItems="flex-end" space={3}>
-                <Text fontSize={24} fontWeight="bold" color="#E2E5E7">
+                <Text
+                  fontSize={24}
+                  color="#E2E5E7"
+                  fontWeight="600"
+                  fontFamily="$body"
+                >
                   1267
                 </Text>
-                <Text fontSize={12} color="#979DA3" marginBottom={3}>
+                <Text
+                  fontSize={12}
+                  color="#979DA3"
+                  marginBottom={6}
+                  fontWeight="400"
+                  fontFamily="$body"
+                >
                   kcal
                 </Text>
               </XStack>
-              <Text fontSize={12} color="#979DA3" marginTop={4}>
+              <Text
+                fontSize={12}
+                color="#979DA3"
+                marginTop={4}
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Calories burned
               </Text>
             </YStack>
             <YStack flex={1}>
               <XStack alignItems="flex-end" space={3}>
-                <Text fontSize={24} fontWeight="bold" color="#E2E5E7">
+                <Text
+                  fontSize={24}
+                  color="#E2E5E7"
+                  fontWeight="600"
+                  fontFamily="$body"
+                >
                   120
                 </Text>
-                <Text fontSize={12} color="#979DA3" marginBottom={3}>
+                <Text
+                  fontSize={12}
+                  color="#979DA3"
+                  marginBottom={6}
+                  fontWeight="400"
+                  fontFamily="$body"
+                >
                   BPM
                 </Text>
               </XStack>
-              <Text fontSize={12} color="#979DA3" marginTop={4}>
+              <Text
+                fontSize={12}
+                color="#979DA3"
+                marginTop={4}
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Average heart rate
               </Text>
             </YStack>
           </XStack>
         </Card>
-        {/* Body Weights Overview Section */}
         <XStack
           justifyContent="space-between"
           alignItems="center"
           marginTop="$5"
           marginBottom="$3"
         >
-          <Text fontSize={16} fontWeight="bold" flex={1} color={"#1E272E"}>
+          <Text
+            fontSize={16}
+            flex={1}
+            color={"#1E272E"}
+            fontWeight="600"
+            fontFamily="$body"
+          >
             Body Weights Overview
           </Text>
           <Pressable
@@ -258,7 +363,12 @@ export default function Home() {
               padding: 5,
             })}
           >
-            <Text fontSize={13} color="#666">
+            <Text
+              fontSize={13}
+              color="#666"
+              fontWeight="400"
+              fontFamily="$body"
+            >
               Show more
             </Text>
           </Pressable>
@@ -267,36 +377,76 @@ export default function Home() {
           <XStack alignItems="center" space="$3" marginBottom="$3">
             <WeightIconBadge size={40} />
             <YStack flex={1}>
-              <Text fontSize={16} color="#E2E5E7" fontWeight="$6">
+              <Text
+                fontSize={16}
+                color="#E2E5E7"
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 You reduced 1.8 kg in last 7 days
               </Text>
-              <Text fontSize={12} color="#979DA3">
+              <Text
+                fontSize={12}
+                color="#979DA3"
+                fontWeight="400"
+                fontFamily="$body"
+              >
                 Keep tracking for steady progress.
               </Text>
             </YStack>
           </XStack>
         </Card>
       </ScrollView>
-      {/* FAB Button */}
-      <Button
-        style={styles.fab}
-        onPress={openSheet}
-        icon={ScaleIcon({ size: 24, color: "#fff" })}
-        backgroundColor="#2996FF"
-        borderRadius={50}
-        color="#fff"
-        pressStyle={{
-          backgroundColor: "#1E7FE5",
-        }}
-      >
-        Log Body Weight
-      </Button>
+      <XStack style={styles.fabContainer} space="$3">
+        <Button
+          onPress={openSheet}
+          icon={ScaleIcon({ size: 24, color: "#fff" })}
+          backgroundColor="#2996FF"
+          borderRadius={50}
+          color="#fff"
+          pressStyle={{
+            backgroundColor: "#1E7FE5",
+          }}
+          style={styles.buttonHalf}
+        >
+          Log Weight
+        </Button>
+        <Button
+          onPress={async () => {
+            await triggerHaptic("medium");
+            console.log("Navigate to /create-target");
+          }}
+          icon={TargetArrowIcon({ size: 24, color: "#fff" })}
+          backgroundColor="#10B981"
+          borderRadius={50}
+          color="#fff"
+          pressStyle={{
+            backgroundColor: "#0C9067",
+          }}
+          style={styles.buttonHalf}
+        >
+          New Goal
+        </Button>
+      </XStack>
       <LogBodyWeight open={showSheet} onOpenChange={setShowSheet} />
     </View>
   );
 }
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F6F8FA" },
-  fab: { position: "absolute", bottom: 20, alignSelf: "center" },
+  fabContainer: {
+    position: "absolute",
+    bottom: 20,
+    flexDirection: "row",
+    width: "100%",
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
+  },
+  buttonHalf: {
+    flex: 1,
+    width: width / 2,
+  },
 });
