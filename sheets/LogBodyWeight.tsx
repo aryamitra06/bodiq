@@ -1,6 +1,6 @@
 import { Pressable, Keyboard } from "react-native";
 import { Svg, Path } from "react-native-svg";
-import { Sheet, Text, YStack, XStack, Input, Button } from "tamagui";
+import { Sheet, Text, YStack, XStack, Input } from "tamagui";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState, useEffect } from "react";
 import { triggerHaptic } from "@/utils/haptics";
@@ -69,16 +69,13 @@ export default function LogBodyWeight({ open, onOpenChange }) {
         backgroundColor="#F6F8FA"
         borderTopLeftRadius={20}
         borderTopRightRadius={20}
-        position="relative"
       >
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize={16} color="#1E272E" fontWeight="600" fontFamily="$body">
-            Log Body Weight
-          </Text>
+        <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
           <Pressable
             onPress={handleCancel}
             android_ripple={{ color: "#aaa" }}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            disabled={isLoading}
           >
             <Svg
               width={24}
@@ -96,13 +93,38 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               <Path d="M6 6l12 12" />
             </Svg>
           </Pressable>
+          <Text
+            fontSize={16}
+            color="#1E272E"
+            fontWeight="600"
+            fontFamily="$body"
+          >
+            Log Body Weight
+          </Text>
+          <Pressable
+            onPress={handleSave}
+            android_ripple={{ color: "#aaa" }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            disabled={isLoading}
+          >
+            <Text
+              fontSize={16}
+              color={isLoading ? "#999" : "#007AFF"}
+              fontWeight="600"
+              fontFamily="$body"
+            >
+              {isLoading ? "Saving..." : "Save"}
+            </Text>
+          </Pressable>
         </XStack>
         <YStack space="$3">
-          <Text fontSize={14} color="#979DA3" fontWeight="400" fontFamily="$body">
-            Here you can input your new weight.
-          </Text>
           <YStack space="$2">
-            <Text fontSize={14} color="#1E272E" fontWeight="600" fontFamily="$body">
+            <Text
+              fontSize={14}
+              color="#1E272E"
+              fontWeight="600"
+              fontFamily="$body"
+            >
               Date
             </Text>
             <Pressable
@@ -133,7 +155,12 @@ export default function LogBodyWeight({ open, onOpenChange }) {
             )}
           </YStack>
           <YStack space="$2">
-            <Text fontSize={14} color="#1E272E" fontWeight="600" fontFamily="$body">
+            <Text
+              fontSize={14}
+              color="#1E272E"
+              fontWeight="600"
+              fontFamily="$body"
+            >
               Weight (in Kilogram)
             </Text>
             <Input
@@ -148,30 +175,7 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               padding="$2"
             />
           </YStack>
-          <XStack justifyContent="space-between" marginTop="$4">
-            <Button
-              onPress={handleCancel}
-              backgroundColor="#E0E0E0"
-              color="#1E272E"
-              flex={1}
-              marginRight="$2"
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onPress={handleSave}
-              backgroundColor="#007AFF"
-              color="white"
-              flex={1}
-              marginLeft="$2"
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving..." : "Save"}
-            </Button>
-          </XStack>
         </YStack>
       </Sheet.Frame>
     </Sheet>
-  );
-}
+  )}

@@ -4,13 +4,20 @@ import Svg, { Path } from "react-native-svg";
 import { useState } from "react";
 import LogBodyWeight from "@/sheets/LogBodyWeight";
 import { triggerHaptic } from "@/utils/haptics";
+import CreateGoal from "@/sheets/CreateGoal";
 
 export default function Home() {
   const [showSheet, setShowSheet] = useState(false);
+  const [showGoalSheet, setShowGoalSheet] = useState(false);
 
   const openSheet = async () => {
     await triggerHaptic("medium");
     setShowSheet(true);
+  };
+
+  const openGoalSheet = async () => {
+    await triggerHaptic("medium");
+    setShowGoalSheet(true);
   };
 
   const FireIconBadge = ({ size = 40 }) => {
@@ -412,16 +419,13 @@ export default function Home() {
           Log Weight
         </Button>
         <Button
-          onPress={async () => {
-            await triggerHaptic("medium");
-            console.log("Navigate to /create-target");
-          }}
+          onPress={openGoalSheet}
           icon={TargetArrowIcon({ size: 24, color: "#fff" })}
-          backgroundColor="#10B981"
+          backgroundColor="#2996FF"
           borderRadius={50}
           color="#fff"
           pressStyle={{
-            backgroundColor: "#0C9067",
+            backgroundColor: "#1E7FE5",
           }}
           style={styles.buttonHalf}
         >
@@ -429,6 +433,7 @@ export default function Home() {
         </Button>
       </XStack>
       <LogBodyWeight open={showSheet} onOpenChange={setShowSheet} />
+      <CreateGoal open={showGoalSheet} onOpenChange={setShowGoalSheet} />
     </View>
   );
 }
