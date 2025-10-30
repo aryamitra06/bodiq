@@ -1,35 +1,42 @@
 import { useAuth } from "@/contexts/AuthContext/useAuth";
+import { useAddGoalMutation } from "@/features/bodyweight/goalApi";
 import { triggerHaptic } from "@/utils/haptics";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEffect, useState } from "react";
-import { Keyboard, Pressable, ScrollView } from "react-native";
+import { Keyboard, Pressable } from "react-native";
 import { Path, Svg } from "react-native-svg";
 import { Input, Sheet, Text, XStack, YStack } from "tamagui";
 
-// Define goal types
 const GOAL_TYPES = [
-  { id: "weight_loss", label: "Weight Loss" },
-  { id: "weight_gain", label: "Weight Gain" },
-  { id: "strength", label: "Strength Training" },
+  {
+    id: "weight_loss",
+    label: "Weight Loss",
+    metricLabel: "Target Weight (kg)",
+  },
+  {
+    id: "weight_gain",
+    label: "Weight Gain",
+    metricLabel: "Target Weight (kg)",
+  },
+  { id: "strength", label: "Strength Training", metricLabel: "Target PR (kg)" },
 ];
 
 export default function SetNewGoal({ open, onOpenChange }) {
   const [goalType, setGoalType] = useState("");
   const [targetValue, setTargetValue] = useState("");
   const [deadline, setDeadline] = useState(new Date());
-  const [notes, setNotes] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [showGoalTypePicker, setShowGoalTypePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const [addGoal] = useAddGoalMutation(); // ✅ RTK Query mutation hook
 
   useEffect(() => {
     if (!open) {
       setGoalType("");
       setTargetValue("");
       setDeadline(new Date());
-      setNotes("");
       setShowPicker(false);
       setShowGoalTypePicker(false);
     }
@@ -39,32 +46,21 @@ export default function SetNewGoal({ open, onOpenChange }) {
     await triggerHaptic("light");
     Keyboard.dismiss();
 
-    if (!goalType) {
-      console.log("⚠️ Please select a goal type.");
-      return;
-    }
-
-    if (!targetValue) {
-      console.log("⚠️ Please enter a target value.");
-      return;
-    }
+    if (!goalType) return console.log("⚠️ Please select a goal type.");
+    if (!targetValue) return console.log("⚠️ Please enter a target value.");
 
     try {
       setIsLoading(true);
-      const formattedDeadline = deadline.toISOString().split("T")[0];
 
-      const goalData = {
-        goalType,
-        targetValue,
+      const formattedDeadline = deadline.toISOString(); // ✅ ISO datetime for Appwrite
+      const response = await addGoal({
+        goal_type: goalType,
+        target: targetValue,
         deadline: formattedDeadline,
-        notes,
         userId: user.$id,
-      };
+      }).unwrap();
 
-      console.log("✅ Saved goal:", goalData);
-      // TODO: Add your API call here
-      // await addGoal(goalData).unwrap();
-
+      console.log("✅ Goal saved:", response);
       onOpenChange(false);
     } catch (error) {
       console.error("❌ Failed to save goal:", error);
@@ -81,6 +77,9 @@ export default function SetNewGoal({ open, onOpenChange }) {
 
   const selectedGoalLabel =
     GOAL_TYPES.find((g) => g.id === goalType)?.label || "Select goal type";
+
+  const selectedGoalPlaceholder =
+    GOAL_TYPES.find((g) => g.id === goalType)?.metricLabel || "e.g., 75 kg";
 
   return (
     <Sheet
@@ -103,17 +102,13 @@ export default function SetNewGoal({ open, onOpenChange }) {
         borderTopLeftRadius={20}
         borderTopRightRadius={20}
       >
+        {/* Header */}
         <XStack
           justifyContent="space-between"
           alignItems="center"
           marginBottom="$3"
         >
-          <Pressable
-            onPress={handleCancel}
-            android_ripple={{ color: "#aaa" }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            disabled={isLoading}
-          >
+          <Pressable onPress={handleCancel} disabled={isLoading}>
             <Svg
               width={24}
               height={24}
@@ -130,39 +125,26 @@ export default function SetNewGoal({ open, onOpenChange }) {
               <Path d="M6 6l12 12" />
             </Svg>
           </Pressable>
-          <Text
-            fontSize={16}
-            color="#1E272E"
-            fontWeight="600"
-            fontFamily="$body"
-          >
+          <Text fontSize={16} color="#1E272E" fontWeight="600">
             Set New Goal
           </Text>
-          <Pressable
-            onPress={handleSave}
-            android_ripple={{ color: "#aaa" }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-            disabled={isLoading}
-          >
+          <Pressable onPress={handleSave} disabled={isLoading}>
             <Text
               fontSize={16}
               color={isLoading ? "#999" : "#007AFF"}
               fontWeight="600"
-              fontFamily="$body"
             >
               {isLoading ? "Saving..." : "Save"}
             </Text>
           </Pressable>
         </XStack>
+
+        {/* Form Content */}
         <YStack space="$3">
+          {/* Goal Type */}
           <YStack space="$2">
-            <Text
-              fontSize={14}
-              color="#1E272E"
-              fontWeight="600"
-              fontFamily="$body"
-            >
-              Goal Type *
+            <Text fontSize={14} fontWeight="600" color="#1E272E">
+              Goal Type
             </Text>
             <Pressable
               onPress={() => {
@@ -202,6 +184,7 @@ export default function SetNewGoal({ open, onOpenChange }) {
                 <Path d="M6 9l6 6 6-6" />
               </Svg>
             </Pressable>
+
             {showGoalTypePicker && (
               <YStack
                 backgroundColor="white"
@@ -238,19 +221,18 @@ export default function SetNewGoal({ open, onOpenChange }) {
               </YStack>
             )}
           </YStack>
+
+          {/* Target Value */}
           <YStack space="$2">
-            <Text
-              fontSize={14}
-              color="#1E272E"
-              fontWeight="600"
-              fontFamily="$body"
-            >
-              Target Value
+            <Text fontSize={14} fontWeight="600" color="#1E272E">
+              {GOAL_TYPES.find((g) => g.id === goalType)?.metricLabel ||
+                "Target Value"}
             </Text>
             <Input
               value={targetValue}
               onChangeText={setTargetValue}
-              placeholder="e.g., 75 kg, 10%, 100 lbs"
+              keyboardType="numeric"
+              placeholder={selectedGoalPlaceholder}
               backgroundColor="white"
               borderColor="#E0E0E0"
               borderWidth={1}
@@ -258,13 +240,10 @@ export default function SetNewGoal({ open, onOpenChange }) {
               padding="$2"
             />
           </YStack>
+
+          {/* Deadline */}
           <YStack space="$2">
-            <Text
-              fontSize={14}
-              color="#1E272E"
-              fontWeight="600"
-              fontFamily="$body"
-            >
+            <Text fontSize={14} fontWeight="600" color="#1E272E">
               Deadline
             </Text>
             <Pressable

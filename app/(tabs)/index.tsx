@@ -1,14 +1,29 @@
 import { StyleSheet, View, Pressable, Dimensions } from "react-native";
 import { Button, Card, ScrollView, Text, YStack, XStack } from "tamagui";
 import Svg, { Path } from "react-native-svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LogBodyWeight from "@/sheets/LogBodyWeight";
 import { triggerHaptic } from "@/utils/haptics";
 import CreateGoal from "@/sheets/CreateGoal";
+import { useRouter } from "expo-router";
+import { useGetWeightsQuery } from "@/features/bodyweight/bodyweightApi";
+import { useAuth } from "@/contexts/AuthContext/useAuth";
+import GoogleFit, { Scopes } from "react-native-google-fit";
 
 export default function Home() {
+  const { user } = useAuth();
+  const {
+    data: weights = [],
+    isLoading,
+    error,
+  } = useGetWeightsQuery(user?.$id);
+  const router = useRouter();
   const [showSheet, setShowSheet] = useState(false);
   const [showGoalSheet, setShowGoalSheet] = useState(false);
+    const [distance, setDistance] = useState<number | null>(null);
+  const [calories, setCalories] = useState<number | null>(null);
+  const [bpm, setBpm] = useState<number | null>(null);
+
 
   const openSheet = async () => {
     await triggerHaptic("medium");
@@ -19,6 +34,55 @@ export default function Home() {
     await triggerHaptic("medium");
     setShowGoalSheet(true);
   };
+
+  const fetchTodayData = async () => {
+    const options = {
+      scopes: [
+        Scopes.FITNESS_ACTIVITY_READ,
+        Scopes.FITNESS_BODY_READ,
+        Scopes.FITNESS_LOCATION_READ,
+        Scopes.FITNESS_HEART_RATE_READ,
+      ],
+    };
+
+    const authResult = await GoogleFit.authorize(options);
+    if (!authResult.success) {
+      console.log("Google Fit authorization failed");
+      return;
+    }
+
+    const end = new Date();
+    const start = new Date();
+    start.setHours(0, 0, 0, 0); // start of today
+
+    const opt = {
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+    };
+
+    // --- Distance (meters → km) ---
+    const distRes = await GoogleFit.getDailyDistanceSamples(opt);
+    const totalDist =
+      distRes.reduce((sum, d) => sum + (d.distance || 0), 0) / 1000;
+    setDistance(totalDist);
+
+    // --- Calories burned ---
+    const calRes = await GoogleFit.getDailyCalorieSamples(opt);
+    const totalCal = calRes.reduce((sum, d) => sum + (d.calorie || 0), 0);
+    setCalories(totalCal);
+
+    // --- Average heart rate (BPM) ---
+    const hrRes = await GoogleFit.getHeartRateSamples(opt);
+    const avgBpm =
+      hrRes.length > 0
+        ? Math.round(hrRes.reduce((sum, h) => sum + h.value, 0) / hrRes.length)
+        : null;
+    setBpm(avgBpm);
+  };
+
+  useEffect(() => {
+    fetchTodayData();
+  }, []);
 
   const FireIconBadge = ({ size = 40 }) => {
     const circleSize = size;
@@ -156,6 +220,16 @@ export default function Home() {
     console.log("Navigate to /trends");
   };
 
+  // Assuming weights are sorted with the latest first (index 0)
+  const latestWeight = parseFloat(weights[weights.length - 1]?.bodyweight || 0);
+  const pastWeight =
+    weights.length > 6 ? parseFloat(weights[0]?.bodyweight || 0) : null;
+
+  const diff =
+    pastWeight !== null
+      ? parseFloat((pastWeight - latestWeight).toFixed(1))
+      : 0;
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ padding: 15 }}>
@@ -171,7 +245,7 @@ export default function Home() {
                     fontWeight="600"
                     fontFamily="$body"
                   >
-                    14 days streak
+                    {weights.length} days streak
                   </Text>
                   <Text
                     fontSize={12}
@@ -269,7 +343,7 @@ export default function Home() {
                   fontWeight="600"
                   fontFamily="$body"
                 >
-                  5.28
+                  {distance?.toFixed(2) || "--"}
                 </Text>
                 <Text fontSize={12} color="#979DA3" marginBottom={6}>
                   km
@@ -293,7 +367,7 @@ export default function Home() {
                   fontWeight="600"
                   fontFamily="$body"
                 >
-                  1267
+                  {Math?.round(calories) || "--"}
                 </Text>
                 <Text
                   fontSize={12}
@@ -323,7 +397,7 @@ export default function Home() {
                   fontWeight="600"
                   fontFamily="$body"
                 >
-                  120
+                  {bpm || "--"}
                 </Text>
                 <Text
                   fontSize={12}
@@ -364,7 +438,7 @@ export default function Home() {
           </Text>
           <Pressable
             android_ripple={{ color: "#aaa" }}
-            onPress={handleShowMore}
+            onPress={() => router.push("/trends")}
             style={({ pressed }) => ({
               opacity: pressed ? 0.6 : 1,
               padding: 5,
@@ -390,7 +464,13 @@ export default function Home() {
                 fontWeight="400"
                 fontFamily="$body"
               >
-                You reduced 1.8 kg in last 7 days
+                {pastWeight === null
+                  ? "Not enough data to calculate"
+                  : diff > 0
+                  ? `You reduced ${diff} kg in last 7 days`
+                  : diff < 0
+                  ? `You gained ${Math.abs(diff)} kg in last 7 days`
+                  : "No weight change in last 7 days"}
               </Text>
               <Text
                 fontSize={12}

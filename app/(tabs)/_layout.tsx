@@ -89,6 +89,25 @@ export default function TabsLayout() {
     </Svg>
   );
 
+  const TargetArrowIcon = ({ size = 24, color = "black" }) => (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+      <Path d="M12 7a5 5 0 1 0 5 5" />
+      <Path d="M13 3.055a9 9 0 1 0 7.941 7.945" />
+      <Path d="M15 6v3h3l3-3h-3v-3" />
+      <Path d="M15 9l-3 3" />
+    </Svg>
+  );
+
   return (
     <Tabs
       screenListeners={{
@@ -117,8 +136,10 @@ export default function TabsLayout() {
             return <HomeIcon color={color} size={size} />;
           if (route.name === "trends")
             return <TrendsIcon color={color} size={size} />;
-          if (route.name === "friends")
-            return <FriendsIcon color={color} size={size} />;
+          if (route.name === "goals")
+            return <TargetArrowIcon color={color} size={size} />;
+          // if (route.name === "friends")
+          //   return <FriendsIcon color={color} size={size} />;
         },
         tabBarActiveTintColor: "#2996FF",
         tabBarInactiveTintColor: "gray",
@@ -179,12 +200,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="goals"
+        options={{
+          title: "Goals",
+          tabBarShowLabel: false,
+        }}
+      />
+      {/* <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
           tabBarShowLabel: false,
         }}
-      />
+      /> */}
     </Tabs>
   );
 }
