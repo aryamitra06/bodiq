@@ -68,8 +68,6 @@ export default function Goals() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Your Goals</Text>
-
       <FlatList
         data={goals}
         keyExtractor={(item) => item.id}
