@@ -1,10 +1,9 @@
 import { account, databases } from "@/lib/appwrite";
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ID, Query } from "react-native-appwrite";
+import { ID, Permission, Query, Role } from "react-native-appwrite";
 
 const DATABASE_ID = "6901bf840022f094fab0";
 const COLLECTION_ID = "bodyweight";
-
 
 export const bodyweightApi = createApi({
   reducerPath: "bodyweightApi",
@@ -15,13 +14,15 @@ export const bodyweightApi = createApi({
     getWeights: builder.query<any[], string>({
       async queryFn(userId) {
         try {
-          const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-            Query.equal("userid", userId),
-          ]);
+          const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTION_ID,
+            [Query.equal("userid", userId)]
+          );
 
           const data = response.documents.map((doc) => ({
             id: doc.$id,
-            measured_bodyweight: doc.measured_bodyweight,
+            bodyweight: doc.measured_bodyweight,
             userid: doc.userid,
           }));
 
@@ -35,23 +36,24 @@ export const bodyweightApi = createApi({
 
     // ✅ Add new weight
     addWeight: builder.mutation({
-      async queryFn(body: { weight: number; date: string; userId: string }) {
+      async queryFn(body: { weight: string; date: string; userId: string }) {
         try {
           const response = await databases.createDocument(
             DATABASE_ID,
             COLLECTION_ID,
             ID.unique(),
             {
-              measured_bodyweight: body.weight,
-              date: body.date,
+              bodyweight: body.weight,
+              measurement_date: body.date,
               userid: body.userId,
             },
             [
-              `read("user:${body.userId}")`,
-              `update("user:${body.userId}")`,
-              `delete("user:${body.userId}")`,
+              Permission.read(Role.user(body.userId)),
+              Permission.update(Role.user(body.userId)),
+              Permission.delete(Role.user(body.userId)),
             ]
           );
+
           return { data: response };
         } catch (error: any) {
           return { error: { message: error.message } };

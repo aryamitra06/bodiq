@@ -91,6 +91,11 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: async () => {
+          await triggerHaptic("medium");
+        },
+      }}
       screenOptions={({ route }) => ({
         headerShown: true,
         headerStyle: {
@@ -164,11 +169,6 @@ export default function TabsLayout() {
               <BellIcon size={24} color="#fff" />
             </Pressable>
           ),
-        }}
-        listeners={{
-          tabPress: async () => {
-            await triggerHaptic("medium");
-          },
         }}
       />
       <Tabs.Screen

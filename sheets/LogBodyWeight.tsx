@@ -2,19 +2,48 @@ import { Pressable, Keyboard } from "react-native";
 import { Svg, Path } from "react-native-svg";
 import { Sheet, Text, YStack, XStack, Input, Button } from "tamagui";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { triggerHaptic } from "@/utils/haptics";
+import { useAuth } from "@/contexts/AuthContext/useAuth";
+import { useAddWeightMutation } from "@/features/bodyweight/bodyweightApi";
 
 export default function LogBodyWeight({ open, onOpenChange }) {
   const [weight, setWeight] = useState("");
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
+  const [addWeight, { isLoading }] = useAddWeightMutation();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!open) {
+      setWeight("");
+      setDate(new Date());
+      setShowPicker(false);
+    }
+  }, [open]);
+
   const handleSave = async () => {
     await triggerHaptic("light");
-    console.log("Saved weight:", weight, "Date:", date);
-    onOpenChange(false);
     Keyboard.dismiss();
+
+    if (!weight || isNaN(Number(weight))) {
+      console.log("⚠️ Please enter a valid weight.");
+      return;
+    }
+
+    try {
+      const formattedDate = date.toISOString().split("T")[0];
+      const response = await addWeight({
+        weight: String(weight),
+        date: formattedDate,
+        userId: user.$id,
+      }).unwrap();
+      console.log("✅ Saved weight:", response);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("❌ Failed to save weight:", error);
+    }
   };
 
   const handleCancel = async () => {
@@ -43,19 +72,13 @@ export default function LogBodyWeight({ open, onOpenChange }) {
         position="relative"
       >
         <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize={16} fontWeight="bold" color={"#1E272E"}>
+          <Text fontSize={16} color="#1E272E" fontWeight="600" fontFamily="$body">
             Log Body Weight
           </Text>
           <Pressable
-            onPress={async () => {
-              await triggerHaptic("light");
-              onOpenChange(false);
-              Keyboard.dismiss();
-            }}
+            onPress={handleCancel}
             android_ripple={{ color: "#aaa" }}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.6 : 1,
-            })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <Svg
               width={24}
@@ -75,11 +98,11 @@ export default function LogBodyWeight({ open, onOpenChange }) {
           </Pressable>
         </XStack>
         <YStack space="$3">
-          <Text fontSize={14} color="#979DA3">
+          <Text fontSize={14} color="#979DA3" fontWeight="400" fontFamily="$body">
             Here you can input your new weight.
           </Text>
           <YStack space="$2">
-            <Text fontSize={14} color="#1E272E" fontWeight="600">
+            <Text fontSize={14} color="#1E272E" fontWeight="600" fontFamily="$body">
               Date
             </Text>
             <Pressable
@@ -110,7 +133,7 @@ export default function LogBodyWeight({ open, onOpenChange }) {
             )}
           </YStack>
           <YStack space="$2">
-            <Text fontSize={14} color="#1E272E" fontWeight="600">
+            <Text fontSize={14} color="#1E272E" fontWeight="600" fontFamily="$body">
               Weight (in Kilogram)
             </Text>
             <Input
@@ -132,6 +155,7 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               color="#1E272E"
               flex={1}
               marginRight="$2"
+              disabled={isLoading}
             >
               Cancel
             </Button>
@@ -141,8 +165,9 @@ export default function LogBodyWeight({ open, onOpenChange }) {
               color="white"
               flex={1}
               marginLeft="$2"
+              disabled={isLoading}
             >
-              Save
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </XStack>
         </YStack>
